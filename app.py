@@ -8,7 +8,7 @@ db = SQLAlchemy(app)
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.String(100), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
@@ -41,7 +41,16 @@ def delete(id):
 
 @app.route("/update/<id>", methods=["GET", "POST"])
 def update(id):
-    return ""
+    task = Todo.query.get_or_404(id)
+    if request.method == "POST":
+        task.content = request.form["content"]
+        try:
+            db.session.commit()
+            return redirect("/")
+        except:
+            return "There was an issue with your request"
+    else:
+        return render_template("update.html", task=task)
 
 if __name__ == "__main__":
     app.run(debug=True)
